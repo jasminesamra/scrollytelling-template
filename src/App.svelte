@@ -1,5 +1,7 @@
 <script>
+  import Counter from './lib/Counter.svelte';
   import Scrolly from './lib/Scrolly.svelte';
+
   const articleTexts1 = [
     'Scrolly piece 1',
     'Scrolly piece 2',
@@ -25,9 +27,14 @@
   </div>
 {/snippet}
 
+{#snippet sticky3()}
+  <Counter />
+{/snippet}
+
 <main>
   <Scrolly articleTexts={articleTexts1} background={sticky1} />
   <Scrolly articleTexts={articleTexts2} background={sticky2} />
+  <Scrolly background={sticky3} />
 </main>
 
 <style>

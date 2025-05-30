@@ -1,6 +1,42 @@
 <script>
-  // destructuring: take the element called "children" from props and assign it to the variable children
+  import { onMount } from 'svelte';
+  import ArticleTextBox from './ArticleTextBox.svelte';
+
   export const { children, background, articleTexts } = $props();
+
+  let intersectionObserver;
+  let articleTextElements;
+  let areElementsActive = $state([]);
+
+  onMount(() => {
+    const createIntersectionObserver = () => {
+      const options = {
+        threshold: [0.8, 0.9, 0.95, 1]
+      };
+
+      const callback = (entries, observer) => {
+        entries.forEach((entry) => {
+          const elem = entry.target;
+
+          if (entry.intersectionRatio >= 0.9) {
+            elem.style.backgroundColor = '#f7f5eb'; //todo: this should be set within the child component via a prop (but this is a good intermediate step before refactoring to show)
+          } else if (entry.intersectionRatio < 0.9) {
+            elem.style.backgroundColor = '#8aa6df';
+          }
+        });
+      };
+
+      intersectionObserver = new IntersectionObserver(callback, options);
+    };
+    createIntersectionObserver();
+
+    articleTextElements = [...document.getElementsByClassName('article-text')]; //todo: change this to only select children (right now it selects all in the doc)
+
+    articleTextElements.forEach((articleTextElement, index) => {
+      intersectionObserver.observe(articleTextElement);
+      areElementsActive[index] = false;
+    });
+  });
 </script>
 
 <div class="scroller">
@@ -8,8 +44,8 @@
     {@render background()}
   </div>
   <div class="foreground">
-    {#each articleTexts as articleText}
-      <p class="article-text">{articleText}</p>
+    {#each articleTexts as articleText, index}
+      <ArticleTextBox {articleText} />
     {/each}
   </div>
 </div>
@@ -36,13 +72,5 @@
     position: relative; /* Stack on top of the background while still flowing in document order */
     z-index: 1; /* Ensure foreground content sits above the sticky background */
     width: 100%; /* Make foreground take up the full width of its container */
-  }
-
-  .article-text {
-    background-color: #8aa6df; /* Light blue background color for the text box */
-    padding: 50px; /* Add space inside the box on all sides */
-    margin: 50vh auto; /* Add vertical space between items, and center horizontally */
-    width: 70%; /* Base width of the text box, responsive */
-    max-width: 40vw; /* Prevent the text box from getting too wide on large screens */
   }
 </style>
